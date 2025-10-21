@@ -1,0 +1,7 @@
+pandas
+numpy
+flask
+scikit-learn
+joblib
+python-dotenv
+alpha_vantage

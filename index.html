@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Trading Bot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      padding: 20px 0;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #00ffcc;
+      text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: #cccccc;
+      margin-bottom: 30px;
+    }
+    
+    .page {
+      display: none;
+    }
+    
+    .active {
+      display: block;
+    }
+    
+    /* Landing Page Styles */
+    .landing-content {
+      background: rgba(30, 30, 46, 0.8);
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin: 40px 0;
+    }
+    
+    .feature-card {
+      background: rgba(50, 50, 70, 0.6);
+      border-radius: 10px;
+      padding: 25px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+    
+    .feature-title {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      color: #00ccff;
+    }
+    
+    .feature-desc {
+      color: #cccccc;
+      line-height: 1.6;
+    }
+    
+    .btn-start {
+      padding: 15px 40px;
+      background: linear-gradient(45deg, #00ffcc, #00ccff);
+      color: #003333;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+    }
+    
+    .btn-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 255, 204, 0.4);
+    }
+    
+    /* Dashboard Styles */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    @media (max-width: 900px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .panel {
+      background: rgba(30, 30, 46, 0.8);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+    
+    .chart-panel {
+      grid-column: 1 / -1;
+      height: 450px;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #00ccff;
+      display: flex;
+      align-items: center;
+    }
+    
+    h2 i {
+      margin-right: 10px;
+    }
+    
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .status-card {
+      background: rgba(50, 50, 70, 0.6);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+    
+    .status-title {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 10px;
+    }
+    
+    .status-value {
+      font-size: 1.4rem;
+      font-weight: bold;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .pattern-detected {
+      color: #ffcc00;
+    }
+    
+    .trend-bullish {
+      color: #00ffaa;
+    }
+    
+    .trend-bearish {
+      color: #ff3366;
+    }
+    
+    .trade-placed {
+      color: #00ccff;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .trade-suggestion {
+      font-size: 1.2rem;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 15px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    .suggestion-buy {
+      background: rgba(0, 255, 170, 0.2);
+      color: #00ffaa;
+    }
+    
+    .suggestion-sell {
+      background: rgba(255, 51, 102, 0.2);
+      color: #ff3366;
+    }
+    
+    .suggestion-wait {
+      background: rgba(255, 204, 0, 0.2);
+      color: #ffcc00;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    
+    button {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    button i {
+      margin-right: 8px;
+    }
+    
+    .btn-start-trading {
+      background: linear-gradient(45deg, #00ffcc, #00ccff);
+      color: #003333;
+    }
+    
+    .btn-stop {
+      background: linear-gradient(45deg, #ff3366, #ff0066);
+      color: white;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .log-container {
+      height: 200px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    
+    .log-entry {
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .log-time {
+      color: #00ccff;
+      margin-right: 10px;
+    }
+    
+    .performance-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .performance-card {
+      background: rgba(50, 50, 70, 0.6);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+    
+    .performance-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #00ffcc;
+    }
+    
+    .performance-label {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    
+    #candlestickChart {
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+    }
+    
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 400px;
+    }
+    
+    .btn-back {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Landing Page -->
+    <div id="landingPage" class="page active">
+      <header>
+        <h1>AI-Powered Trading Bot</h1>
+        <p class="subtitle">Revolutionize your trading with artificial intelligence and pattern recognition</p>
+      </header>
+      
+      <div class="landing-content">
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3 class="feature-title">AI-Powered Analysis</h3>
+            <p class="feature-desc">Our advanced algorithms analyze market data in real-time to identify profitable trading opportunities.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3 class="feature-title">Pattern Recognition</h3>
+            <p class="feature-desc">Detects candlestick patterns like Bullish Engulfing, Bearish Engulfing, Doji, Hammer, and more.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3 class="feature-title">Real-time Trading</h3>
+            <p class="feature-desc">Execute trades automatically when confidence levels are high, 24/7 without emotions.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">📈</div>
+            <h3 class="feature-title">Performance Analytics</h3>
+            <p class="feature-desc">Track your success rate, profit/loss, and improve your strategy with detailed analytics.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3 class="feature-title">Market Trends</h3>
+            <p class="feature-desc">Identifies market trends (Bullish, Bearish, Neutral) to make informed trading decisions.</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3 class="feature-title">Risk Management</h3>
+            <p class="feature-desc">Built-in risk management with confidence-based trading and stop-loss mechanisms.</p>
+          </div>
+        </div>
+        
+        <button class="btn-start" onclick="showTradingPage()">Start Trading Now</button>
+      </div>
+    </div>
+    
+    <!-- Trading Dashboard -->
+    <div id="tradingPage" class="page">
+      <button class="btn-back" onclick="showLandingPage()">← Back to Features</button>
+      
+      <header>
+        <h1>Live Trading Dashboard</h1>
+        <p class="subtitle">Real-time market analysis with AI-powered trading signals</p>
+      </header>
+      
+      <div class="dashboard">
+        <div class="panel chart-panel">
+          <h2><i>📊</i> Live Market Chart</h2>
+          <div class="chart-container">
+            <canvas id="candlestickChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <h2><i>🔍</i> Market Analysis</h2>
+          <div class="status-grid">
+            <div class="status-card">
+              <div class="status-title">CURRENT PATTERN</div>
+              <div class="status-value" id="currentPattern">Waiting for data...</div>
+            </div>
+            <div class="status-card">
+              <div class="status-title">MARKET TREND</div>
+              <div class="status-value" id="marketTrend">Analyzing...</div>
+            </div>
+            <div class="status-card">
+              <div class="status-title">TRADE STATUS</div>
+              <div class="status-value" id="tradeStatus">Ready</div>
+            </div>
+            <div class="status-card">
+              <div class="status-title">CONFIDENCE LEVEL</div>
+              <div class="status-value" id="confidenceLevel">0%</div>
+            </div>
+          </div>
+          
+          <div id="tradeSuggestion" class="trade-suggestion suggestion-wait">
+            Collecting market data... Please wait for 10 candles
+          </div>
+          
+          <div class="controls">
+            <button class="btn-start-trading" id="startBtn">
+              <i>▶️</i> Start Trading
+            </button>
+            <button class="btn-stop" id="stopBtn" disabled>
+              <i>⏹️</i> Stop Trading
+            </button>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <h2><i>📈</i> Performance Metrics</h2>
+          <div class="performance-grid">
+            <div class="performance-card">
+              <div class="performance-label">TOTAL TRADES</div>
+              <div class="performance-value" id="totalTrades">0</div>
+            </div>
+            <div class="performance-card">
+              <div class="performance-label">SUCCESS RATE</div>
+              <div class="performance-value" id="successRate">0%</div>
+            </div>
+            <div class="performance-card">
+              <div class="performance-label">PROFIT/LOSS</div>
+              <div class="performance-value" id="profitLoss">+0.00%</div>
+            </div>
+            <div class="performance-card">
+              <div class="performance-label">BALANCE</div>
+              <div class="performance-value" id="balance">$10,000</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <h2><i>📝</i> Trading Log</h2>
+          <div class="log-container" id="tradingLog">
+            <div class="log-entry">
+              <span class="log-time">[10:00:00]</span> System initialized
+            </div>
+            <div class="log-entry">
+              <span class="log-time">[10:00:00]</span> Waiting to start trading...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Trading variables
+    let candles = [];
+    let tradingActive = false;
+    let tradeCount = 0;
+    let successfulTrades = 0;
+    let balance = 10000;
+    let tradingInterval;
+    
+    // DOM elements
+    const currentPatternEl = document.getElementById('currentPattern');
+    const marketTrendEl = document.getElementById('marketTrend');
+    const tradeStatusEl = document.getElementById('tradeStatus');
+    const confidenceLevelEl = document.getElementById('confidenceLevel');
+    const totalTradesEl = document.getElementById('totalTrades');
+    const successRateEl = document.getElementById('successRate');
+    const profitLossEl = document.getElementById('profitLoss');
+    const balanceEl = document.getElementById('balance');
+    const tradingLogEl = document.getElementById('tradingLog');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const tradeSuggestionEl = document.getElementById('tradeSuggestion');
+    
+    // Page navigation
+    function showTradingPage() {
+      document.getElementById('landingPage').classList.remove('active');
+      document.getElementById('tradingPage').classList.add('active');
+      initChart();
+    }
+    
+    function showLandingPage() {
+      document.getElementById('tradingPage').classList.remove('active');
+      document.getElementById('landingPage').classList.add('active');
+      stopTrading();
+    }
+    
+    // Initialize chart
+    function initChart() {
+      const ctx = document.getElementById('candlestickChart').getContext('2d');
+      
+      // Generate initial test data
+      generateTestData(10);
+      
+      // Draw initial chart
+      drawChart();
+    }
+    
+    // Generate test data in OHLC format
+    function generateTestData(count = 10) {
+      const now = Date.now();
+      let lastClose = 100;
+      
+      for (let i = 0; i < count; i++) {
+        const open = lastClose;
+        const change = (Math.random() - 0.5) * 5;
+        const close = open + change;
+        const high = Math.max(open, close) + Math.random() * 3;
+        const low = Math.min(open, close) - Math.random() * 3;
+        
+        candles.push({ 
+          x: new Date(now - (count - i) * 60000), 
+          o: open, 
+          h: high, 
+          l: low, 
+          c: close 
+        });
+        
+        lastClose = close;
+      }
+    }
+    
+    // Draw the chart on canvas
+    function drawChart() {
+      const canvas = document.getElementById('candlestickChart');
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas dimensions
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      if (candles.length === 0) return;
+      
+      // Chart dimensions and padding
+      const padding = 40;
+      const width = canvas.width - padding * 2;
+      const height = canvas.height - padding * 2;
+      
+      // Find min and max values for scaling
+      let minVal = Number.MAX_VALUE;
+      let maxVal = Number.MIN_VALUE;
+      
+      candles.forEach(candle => {
+        minVal = Math.min(minVal, candle.l);
+        maxVal = Math.max(maxVal, candle.h);
+      });
+      
+      // Add some padding to the price scale
+      const range = maxVal - minVal;
+      minVal -= range * 0.1;
+      maxVal += range * 0.1;
+      
+      // Calculate candle width
+      const candleWidth = width / candles.length * 0.7;
+      
+      // Draw grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      for (let i = 0; i <= 5; i++) {
+        const y = padding + (height / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(padding + width, y);
+        ctx.stroke();
+        
+        // Price labels
+        const price = maxVal - (range / 5) * i;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '12px Arial';
+        ctx.fillText(price.toFixed(2), 5, y + 4);
+      }
+      
+      // Draw each candle
+      candles.forEach((candle, index) => {
+        const x = padding + (width / candles.length) * index;
+        const yOpen = padding + height - ((candle.o - minVal) / (maxVal - minVal)) * height;
+        const yHigh = padding + height - ((candle.h - minVal) / (maxVal - minVal)) * height;
+        const yLow = padding + height - ((candle.l - minVal) / (maxVal - minVal)) * height;
+        const yClose = padding + height - ((candle.c - minVal) / (maxVal - minVal)) * height;
+        
+        // Determine if candle is bullish or bearish
+        const isBullish = candle.c > candle.o;
+        
+        // Draw high-low line
+        ctx.beginPath();
+        ctx.moveTo(x + candleWidth/2, yHigh);
+        ctx.lineTo(x + candleWidth/2, yLow);
+        ctx.strokeStyle = isBullish ? '#00ffaa' : '#ff3366';
+        ctx.stroke();
+        
+        // Draw candle body
+        ctx.fillStyle = isBullish ? 'rgba(0, 255, 170, 0.8)' : 'rgba(255, 51, 102, 0.8)';
+        ctx.fillRect(x, Math.min(yOpen, yClose), candleWidth, Math.abs(yClose - yOpen));
+        
+        // Draw candle border
+        ctx.strokeStyle = isBullish ? '#00cc88' : '#cc0044';
+        ctx.strokeRect(x, Math.min(yOpen, yClose), candleWidth, Math.abs(yClose - yOpen));
+      });
+      
+      // Draw axes
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = 2;
+      
+      // Y-axis
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, padding + height);
+      ctx.stroke();
+      
+      // X-axis
+      ctx.beginPath();
+      ctx.moveTo(padding, padding + height);
+      ctx.lineTo(padding + width, padding + height);
+      ctx.stroke();
+    }
+    
+    // Add entry to trading log
+    function addLogEntry(message) {
+      const now = new Date();
+      const timeString = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+      
+      const logEntry = document.createElement('div');
+      logEntry.className = 'log-entry';
+      logEntry.innerHTML = `<span class="log-time">${timeString}</span> ${message}`;
+      
+      tradingLogEl.appendChild(logEntry);
+      tradingLogEl.scrollTop = tradingLogEl.scrollHeight;
+      
+      // Keep only the last 50 log entries
+      if (tradingLogEl.children.length > 50) {
+        tradingLogEl.removeChild(tradingLogEl.children[0]);
+      }
+    }
+    
+    // Generate a new candle
+    function generateCandle() {
+      const lastClose = candles.length ? candles[candles.length - 1].c : 100;
+      const open = lastClose;
+      const change = (Math.random() - 0.5) * 5;
+      const close = open + change;
+      const high = Math.max(open, close) + Math.random() * 3;
+      const low = Math.min(open, close) - Math.random() * 3;
+      
+      return { 
+        x: new Date(), 
+        o: open, 
+        h: high, 
+        l: low, 
+        c: close 
+      };
+    }
+    
+    // Detect candlestick patterns
+    function detectPattern() {
+      if (candles.length < 2) return "Insufficient data";
+      
+      const current = candles[candles.length - 1];
+      const previous = candles[candles.length - 2];
+      
+      // Bullish Engulfing Pattern
+      if (previous.c < previous.o && current.o < previous.c && current.c > previous.o) {
+        return "Bullish Engulfing";
+      }
+      
+      // Bearish Engulfing Pattern
+      if (previous.c > previous.o && current.o > previous.c && current.c < previous.o) {
+        return "Bearish Engulfing";
+      }
+      
+      // Doji Pattern (open and close are nearly equal)
+      if (Math.abs(current.c - current.o) / ((current.h - current.l) || 1) < 0.1) {
+        return "Doji";
+      }
+      
+      // Hammer Pattern (small body, long lower wick)
+      if (current.c > current.o && 
+          (current.c - current.o) < (current.h - current.l) * 0.3 &&
+          (current.o - current.l) > (current.h - current.l) * 0.6) {
+        return "Hammer";
+      }
+      
+      // Shooting Star Pattern (small body, long upper wick)
+      if (current.c < current.o && 
+          (current.o - current.c) < (current.h - current.l) * 0.3 &&
+          (current.h - current.o) > (current.h - current.l) * 0.6) {
+        return "Shooting Star";
+      }
+      
+      return "No clear pattern";
+    }
+    
+    // Determine market trend
+    function determineTrend() {
+      if (candles.length < 5) return "Neutral";
+      
+      // Simple SMA-based trend detection
+      const shortPeriod = 5;
+      const longPeriod = Math.min(20, candles.length);
+      
+      let shortSum = 0;
+      let longSum = 0;
+      
+      for (let i = 1; i <= longPeriod; i++) {
+        const price = candles[candles.length - i].c;
+        if (i <= shortPeriod) shortSum += price;
+        longSum += price;
+      }
+      
+      const shortSma = shortSum / shortPeriod;
+      const longSma = longSum / longPeriod;
+      
+      if (shortSma > longSma * 1.01) return "Bullish";
+      if (shortSma < longSma * 0.99) return "Bearish";
+      return "Neutral";
+    }
+    
+    // Calculate confidence level based on pattern and trend
+    function calculateConfidence(pattern, trend) {
+      let confidence = 0;
+      
+      if (pattern === "Bullish Engulfing" && trend !== "Bearish") {
+        confidence = 0.7;
+      } 
+      else if (pattern === "Bearish Engulfing" && trend !== "Bullish") {
+        confidence = 0.7;
+      }
+      else if (pattern === "Hammer" && trend === "Bullish") {
+        confidence = 0.6;
+      }
+      else if (pattern === "Shooting Star" && trend === "Bearish") {
+        confidence = 0.6;
+      }
+      else if (pattern === "Doji") {
+        confidence = 0.1;
+      }
+      
+      return confidence;
+    }
+    
+    // Update trade suggestion
+    function updateTradeSuggestion(pattern, trend, confidence) {
+      tradeSuggestionEl.className = "trade-suggestion ";
+      
+      if (candles.length < 10) {
+        tradeSuggestionEl.classList.add("suggestion-wait");
+        tradeSuggestionEl.innerHTML = `Collecting market data... Please wait for ${10 - candles.length} more candles`;
+        return;
+      }
+      
+      if (confidence > 0.6) {
+        if (pattern.includes("Bullish") || trend === "Bullish") {
+          tradeSuggestionEl.classList.add("suggestion-buy");
+          tradeSuggestionEl.innerHTML = `✅ STRONG BUY SIGNAL (Confidence: ${Math.round(confidence * 100)}%)<br>Pattern: ${pattern}, Trend: ${trend}`;
+        } else {
+          tradeSuggestionEl.classList.add("suggestion-sell");
+          tradeSuggestionEl.innerHTML = `❌ STRONG SELL SIGNAL (Confidence: ${Math.round(confidence * 100)}%)<br>Pattern: ${pattern}, Trend: ${trend}`;
+        }
+      } else {
+        tradeSuggestionEl.classList.add("suggestion-wait");
+        tradeSuggestionEl.innerHTML = "⏸️ WAIT FOR BETTER OPPORTUNITY<br>Market conditions not optimal for trading";
+      }
+    }
+    
+    // Place a trade based on pattern and trend
+    function placeTrade(pattern, trend, confidence) {
+      if (candles.length < 10) {
+        return { 
+          decision: "WAIT", 
+          reason: `Need more data (${candles.length}/10 candles)` 
+        };
+      }
+      
+      let decision = "HOLD";
+      let reason = "No clear signal";
+      
+      // Trading logic based on pattern and trend
+      if (pattern === "Bullish Engulfing" && trend !== "Bearish" && confidence > 0.6) {
+        decision = "CALL";
+        reason = "Bullish pattern in upward or neutral trend";
+      } 
+      else if (pattern === "Bearish Engulfing" && trend !== "Bullish" && confidence > 0.6) {
+        decision = "PUT";
+        reason = "Bearish pattern in downward or neutral trend";
+      }
+      else if (pattern === "Hammer" && trend === "Bullish" && confidence > 0.5) {
+        decision = "CALL";
+        reason = "Hammer pattern in bullish trend";
+      }
+      else if (pattern === "Shooting Star" && trend === "Bearish" && confidence > 0.5) {
+        decision = "PUT";
+        reason = "Shooting star in bearish trend";
+      }
+      else if (pattern === "Doji") {
+        decision = "HOLD";
+        reason = "Doji indicates market indecision";
+      }
+      
+      // Execute trade if decision is not HOLD
+      if (decision !== "HOLD") {
+        tradeCount++;
+        
+        // Simulate trade outcome (in real app, this would be an API call)
+        const success = Math.random() < confidence;
+        if (success) successfulTrades++;
+        
+        // Update balance (assuming $100 per trade)
+        const profit = success ? 80 : -100; // $80 profit on win, $100 loss on lose
+        balance += profit;
+        
+        // Update performance metrics
+        totalTradesEl.textContent = tradeCount;
+        successRateEl.textContent = tradeCount > 0 
+          ? `${Math.round((successfulTrades / tradeCount) * 100)}%` 
+          : "0%";
+        
+        const profitPercent = ((balance - 10000) / 10000 * 100).toFixed(2);
+        profitLossEl.textContent = `${profitPercent >= 0 ? '+' : ''}${profitPercent}%`;
+        profitLossEl.style.color = profitPercent >= 0 ? '#00ffaa' : '#ff3366';
+        
+        balanceEl.textContent = `$${balance.toLocaleString()}`;
+        
+        addLogEntry(`Placed ${decision} trade (Confidence: ${Math.round(confidence * 100)}%)`);
+        addLogEntry(`Trade ${success ? "SUCCESS" : "FAILED"} - ${profit >= 0 ? '+' : ''}$${profit}`);
+        
+        return { 
+          decision: decision, 
+          reason: reason,
+          confidence: confidence,
+          success: success
+        };
+      }
+      
+      return { 
+        decision: decision, 
+        reason: reason,
+        confidence: confidence
+      };
+    }
+    
+    // Update the UI with current market information
+    function updateMarketUI(pattern, trend, tradeResult) {
+      // Update pattern display
+      currentPatternEl.textContent = pattern;
+      currentPatternEl.className = "";
+      if (pattern !== "No clear pattern" && pattern !== "Insufficient data") {
+        currentPatternEl.classList.add("pattern-detected");
+      }
+      
+      // Update trend display
+      marketTrendEl.textContent = trend;
+      marketTrendEl.className = "";
+      if (trend === "Bullish") marketTrendEl.classList.add("trend-bullish");
+      if (trend === "Bearish") marketTrendEl.classList.add("trend-bearish");
+      
+      // Update trade status
+      tradeStatusEl.textContent = tradeResult.decision;
+      tradeStatusEl.className = "";
+      if (tradeResult.decision === "CALL" || tradeResult.decision === "PUT") {
+        tradeStatusEl.classList.add("trade-placed");
+      }
+      
+      // Update confidence level
+      const confidencePercent = Math.round((tradeResult.confidence || 0) * 100);
+      confidenceLevelEl.textContent = `${confidencePercent}%`;
+      
+      // Update trade suggestion
+      updateTradeSuggestion(pattern, trend, tradeResult.confidence || 0);
+    }
+    
+    // Main trading loop
+    function tradingLoop() {
+      if (!tradingActive) return;
+      
+      // Generate new candle
+      const candle = generateCandle();
+      candles.push(candle);
+      
+      // Keep a reasonable number of candles
+      if (candles.length > 50) candles.shift();
+      
+      // Update chart
+      drawChart();
+      
+      // Analyze market
+      const pattern = detectPattern();
+      const trend = determineTrend();
+      const confidence = calculateConfidence(pattern, trend);
+      const tradeResult = placeTrade(pattern, trend, confidence);
+      
+      // Update UI
+      updateMarketUI(pattern, trend, tradeResult);
+    }
+    
+    // Start the trading bot
+    function startTrading() {
+      tradingActive = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      
+      addLogEntry("Trading started");
+      tradeStatusEl.textContent = "Monitoring market...";
+      
+      // Start the trading interval
+      tradingInterval = setInterval(tradingLoop, 2000);
+    }
+    
+    // Stop the trading bot
+    function stopTrading() {
+      tradingActive = false;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      
+      clearInterval(tradingInterval);
+      addLogEntry("Trading stopped");
+      tradeStatusEl.textContent = "Trading stopped";
+    }
+    
+    // Initialize the application
+    function initApp() {
+      // Set up event listeners
+      startBtn.addEventListener('click', startTrading);
+      stopBtn.addEventListener('click', stopTrading);
+      
+      // Add initial log entry
+      addLogEntry("System initialized. Click Start Trading to begin.");
+    }
+    
+    // Initialize when page loads
+    window.addEventListener('load', initApp);
+    
+    // Redraw chart when window is resized
+    window.addEventListener('resize', drawChart);
+  </script>
+</body>
+</html>
